@@ -9,12 +9,9 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.purple,
-          brightness: Brightness.dark,
-        ),
-      ),
+          useMaterial3: true,
+          primarySwatch: Colors.blue,
+          brightness: Brightness.dark),
       home: HomePage(),
     );
   }
