@@ -10,16 +10,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _showButtons = false;
   List<Category> buttons = [
-    Category(name: "Buraco", icon: Icons.car_crash_outlined),
+    Category(name: "Saneamento Básico", icon: Icons.water_drop_outlined),
+    Category(name: "Sinalização", icon: Icons.dangerous_outlined),
+    Category(name: "Iluminação", icon: Icons.lightbulb_outline),
+    Category(name: "Buraco", icon: Icons.remove_road_outlined),
+    Category(name: "Lixo", icon: Icons.recycling_outlined),
+    Category(name: "Outros", icon: Icons.more_horiz_outlined),
   ];
-
-  void _toggleShowButtons() {
-    setState(() {
-      _showButtons = !_showButtons;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,18 +35,39 @@ class _HomePageState extends State<HomePage> {
       body: const Center(
         child: Text('Hello World!'),
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.add,
-        children: buttons
-            .map((button) => SpeedDialChild(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer,
-                  label: button.name,
-                  child: Icon(
-                    button.icon,
-                  ),
-                ))
-            .toList(),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(left: 30),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              onPressed: () {
+                Navigator.of(context).pushNamed('/irregularities');
+              },
+              child: const Icon(
+                Icons.menu,
+              ),
+            ),
+            SpeedDial(
+              spacing: 12,
+              icon: Icons.add,
+              children: buttons
+                  .map((button) => SpeedDialChild(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        label: button.name,
+                        shape: CircleBorder(),
+                        child: Icon(
+                          button.icon,
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

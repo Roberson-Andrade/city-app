@@ -1,4 +1,5 @@
 import 'package:city/pages/home/home.dart';
+import 'package:city/pages/irregularities/irregularities.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -8,12 +9,16 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      initialRoute: '/home',
+      routes: {
+        '/home': (context) => const HomePage(),
+        '/irregularities': (context) => const IrregularitiesPage(),
+      },
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.purple, brightness: Brightness.dark),
+            seedColor: Colors.deepPurple, brightness: Brightness.dark),
       ),
-      home: HomePage(),
     );
   }
 }
