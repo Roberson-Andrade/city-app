@@ -1,6 +1,6 @@
 class User {
   final String name;
-  final String image;
+  final String avatarImage;
 
-  User({required this.name, required this.image});
+  User({required this.name, required this.avatarImage});
 }
