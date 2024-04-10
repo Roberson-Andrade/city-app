@@ -14,6 +14,7 @@ class App extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/irregularities': (context) => const IrregularitiesPage(),
       },
+      locale: const Locale('pt', 'BR'),
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(

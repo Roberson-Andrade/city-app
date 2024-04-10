@@ -15,10 +15,14 @@ class IrregularityRepository {
         title: "Buraco grande na estrada",
         description:
             "Encontra-se um buraco enorme na rua Avelino Dias Pereira no bairro das Laranjeiras. A prefeitura já foi avisada sobre dezenas de vezes e nada...",
+        address:
+            "Rua Avelino Dias Pereira, 1000 - Cidade Nova, Rio de Janeiro - RJ",
         imagesUrl: [
           "https://media.istockphoto.com/id/95658927/pt/foto/estrada-danos.jpg?s=612x612&w=0&k=20&c=MUg9ULfotqHVm5kNzVEfNnOmiYiK3_n5GLXWeUwbfRs=",
           "https://www.examepelobem.com.br/fotos/images/buracos-na-estrada-o-que-fazer(1).png"
         ],
+        likes: 45,
+        createdAt: DateTime.now(),
         user: User(
             name: "Roberson Andrade",
             avatarImage:
@@ -27,9 +31,12 @@ class IrregularityRepository {
       Irregularity(
         title: "Poste de luz",
         description: "Poste de luz está queimado há 2 semanas.",
+        address: "Rua Valerio Ronchi, 701, Santa Cruz, BH",
         imagesUrl: [
           "https://araraquaraagora.com/images/noticias/11247/10035730_Img0_600x4.jpg"
         ],
+        likes: 2334,
+        createdAt: DateTime.parse("2024-04-01T21:00:00.000Z"),
         user: User(
             name: "Emerson Lacerda",
             avatarImage:
@@ -39,9 +46,12 @@ class IrregularityRepository {
         title: "Terreno Abandonado",
         description:
             "Este terreno encontra-se em estado de abandono há meses, representando um risco à segurança pública e um foco potencial de proliferação de pragas e criminalidade. Solicito uma intervenção urgente por parte da prefeitura para resolver essa situação e garantir a segurança e o bem-estar da comunidade local.",
+        address: "Rua Pedro Aluisio, 321, Rebouças - PR",
         imagesUrl: [
           "https://odia.ig.com.br/_midias/jpg/2018/04/26/img_20170810_122004294_hdr-6553832.jpg"
         ],
+        likes: 3,
+        createdAt: DateTime.now().subtract(Duration(hours: 4)),
         user: User(
             name: "Davi",
             avatarImage:

@@ -1,6 +1,10 @@
 import 'package:city/model/irregularity.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:timeago_flutter/timeago_flutter.dart';
 
 class IrregularityPost extends StatefulWidget {
   final Irregularity irregularity;
@@ -33,6 +37,7 @@ class _IrregularityPostState extends State<IrregularityPost> {
           _buildDescription(),
           const SizedBox(height: 8),
           _buildImageCarousel(),
+          _buildBottomPost()
         ],
       ),
     );
@@ -40,12 +45,39 @@ class _IrregularityPostState extends State<IrregularityPost> {
 
   Widget _buildUserInfo() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage(widget.irregularity.user.avatarImage),
+        Row(
+          children: [
+            CircleAvatar(
+              backgroundImage:
+                  NetworkImage(widget.irregularity.user.avatarImage),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.irregularity.user.name),
+                Timeago(
+                  builder: (_, value) => Text(
+                    value,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  date: widget.irregularity.createdAt,
+                  locale: 'pt_BR',
+                  allowFromNow: true,
+                ),
+              ],
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Text(widget.irregularity.user.name),
+        IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.map_outlined),
+          tooltip: 'Ver no mapa',
+        )
       ],
     );
   }
@@ -55,42 +87,40 @@ class _IrregularityPostState extends State<IrregularityPost> {
       widget.irregularity.description,
       textAlign: TextAlign.start,
       style: const TextStyle(
-        fontWeight: FontWeight.w300,
+        fontWeight: FontWeight.w400,
       ),
     );
   }
 
   Widget _buildImageCarousel() {
-    return SizedBox(
-      height: 250,
-      child: Column(
-        children: [
-          CarouselSlider(
-            items: widget.irregularity.imagesUrl
-                .map((image) => ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Image.network(
-                        image,
-                        width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.cover,
-                      ),
-                    ))
-                .toList(),
-            carouselController: _controller,
-            options: CarouselOptions(
-              autoPlay: false,
-              viewportFraction: 1.0,
-              enlargeCenterPage: false,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _current = index;
-                });
-              },
-            ),
+    return Column(
+      children: [
+        CarouselSlider(
+          items: widget.irregularity.imagesUrl
+              .map((image) => ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.network(
+                      image,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                    ),
+                  ))
+              .toList(),
+          carouselController: _controller,
+          options: CarouselOptions(
+            autoPlay: false,
+            viewportFraction: 1.0,
+            enlargeCenterPage: false,
+            enableInfiniteScroll: false,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _current = index;
+              });
+            },
           ),
-          _buildImageIndicators(),
-        ],
-      ),
+        ),
+        _buildImageIndicators(),
+      ],
     );
   }
 
@@ -114,6 +144,34 @@ class _IrregularityPostState extends State<IrregularityPost> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildBottomPost() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.thumb_up_alt_outlined)),
+            Text(NumberFormat.compact(locale: 'pt_BR')
+                .format(widget.irregularity.likes)
+                .toString()),
+          ],
+        ),
+        const SizedBox(width: 32),
+        Flexible(
+          child: Container(
+            child: Text(
+              widget.irregularity.address,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
