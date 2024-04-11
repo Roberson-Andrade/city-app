@@ -33,9 +33,7 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: const Center(
-        child: Text('Mapa em construção...'),
-      ),
+      body: const Text("Mapa em construção..."),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
