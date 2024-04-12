@@ -1,4 +1,5 @@
 import 'package:city/pages/home/utils.dart';
+import 'package:city/pages/irregularity_form/irregularity_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
@@ -10,15 +11,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Category> buttons = [
-    Category(name: "Saneamento Básico", icon: Icons.water_drop_outlined),
-    Category(name: "Sinalização", icon: Icons.dangerous_outlined),
-    Category(name: "Iluminação", icon: Icons.lightbulb_outline),
-    Category(name: "Buraco", icon: Icons.remove_road_outlined),
-    Category(name: "Lixo", icon: Icons.recycling_outlined),
-    Category(name: "Outros", icon: Icons.more_horiz_outlined),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +25,7 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: const Text("Mapa em construção..."),
+      body: const Center(child: Text("Mapa em construção...")),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
@@ -66,13 +58,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<SpeedDialChild> _buildSpeedDialChildren() {
-    return buttons.map((button) {
+    return Category.getAllCategories().map((category) {
       return SpeedDialChild(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        label: button.name,
-        shape: CircleBorder(),
+        label: category.label,
+        shape: const CircleBorder(),
+        onTap: () => {
+          Navigator.of(context).pushNamed('/irregularities/new',
+              arguments: IrregularityFormArgs(category.type))
+        },
         child: Icon(
-          button.icon,
+          category.icon,
         ),
       );
     }).toList();

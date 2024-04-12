@@ -1,5 +1,6 @@
 import 'package:city/pages/home/home.dart';
 import 'package:city/pages/irregularities/irregularities.dart';
+import 'package:city/pages/irregularity_form/irregularity_form.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -9,10 +10,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/home',
-      routes: {
-        '/home': (context) => const HomePage(),
-        '/irregularities': (context) => const IrregularitiesPage(),
+      onGenerateRoute: (RouteSettings settings) {
+        var routes = <String, WidgetBuilder>{
+          '/': (context) => const HomePage(),
+          '/irregularities': (context) => const IrregularitiesPage(),
+          '/irregularities/new': (context) => IrregularityForm(
+              initialCategoryType: settings.arguments as IrregularityFormArgs)
+        };
+        WidgetBuilder builder = routes[settings.name]!;
+        return MaterialPageRoute(builder: (ctx) => builder(ctx));
       },
       locale: const Locale('pt', 'BR'),
       theme: ThemeData(
