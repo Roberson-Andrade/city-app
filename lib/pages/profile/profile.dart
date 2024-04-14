@@ -8,7 +8,7 @@ class Profile extends StatelessWidget {
   final User user;
   final IrregularityRepository repository = IrregularityRepository();
 
-  Profile({Key? key, required this.user}) : super(key: key);
+  Profile({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +19,7 @@ class Profile extends StatelessWidget {
         0, (sum, irregularity) => sum + irregularity.likes);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(),
       body: Align(
         alignment: Alignment.topCenter,
         child: Padding(
@@ -51,7 +49,7 @@ class Profile extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Text(
                     'Total Posts: ${userIrregularities.length}',
                     style: const TextStyle(
@@ -62,14 +60,15 @@ class Profile extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Expanded(
-                  child: ListView.builder(
-                itemCount: userIrregularities.length,
-                itemBuilder: (context, index) {
-                  return IrregularityPost(
-                    irregularity: userIrregularities[index],
-                  );
-                },
-              ))
+                child: ListView.builder(
+                  itemCount: userIrregularities.length,
+                  itemBuilder: (context, index) {
+                    return IrregularityPost(
+                      irregularity: userIrregularities[index],
+                    );
+                  },
+                ),
+              )
             ],
           ),
         ),

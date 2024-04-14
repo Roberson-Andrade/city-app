@@ -1,7 +1,6 @@
 import 'package:city/model/user.dart';
 
 class Irregularity {
-  final String title;
   final String description;
   final String address;
   final List<String> imagesUrl;
@@ -10,11 +9,10 @@ class Irregularity {
   final DateTime createdAt;
 
   Irregularity(
-      {required this.title,
-      required this.description,
+      {required this.description,
       required this.address,
       required this.imagesUrl,
       required this.user,
-      required this.likes,
+      this.likes = 0,
       required this.createdAt});
 }

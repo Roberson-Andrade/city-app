@@ -2,6 +2,7 @@ import 'package:city/model/irregularity.dart';
 import 'package:city/repositories/irregularity_repository.dart';
 import 'package:city/widgets/irregularity_post.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class IrregularitiesPage extends StatefulWidget {
   const IrregularitiesPage({super.key});
@@ -11,27 +12,38 @@ class IrregularitiesPage extends StatefulWidget {
 }
 
 class _IrregularitiesPageState extends State<IrregularitiesPage> {
-  final IrregularityRepository irregularityRepository =
-      IrregularityRepository();
   List<Irregularity> irregularities = [];
+  late bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    irregularities = irregularityRepository.irregularities;
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final IrregularityRepository irregularityRepository =
+        context.watch<IrregularityRepository>();
+
+    irregularities = irregularityRepository.getIrregularities();
+
     return Scaffold(
       appBar: AppBar(
         actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
       ),
-      body: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: irregularities.length,
-          itemBuilder: (context, index) =>
-              IrregularityPost(irregularity: irregularities[index])),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: irregularities.length,
+              itemBuilder: (context, index) =>
+                  IrregularityPost(irregularity: irregularities[index]),
+            ),
     );
   }
 }

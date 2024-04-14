@@ -1,5 +1,7 @@
 import 'package:city/app.dart';
+import 'package:city/repositories/irregularity_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 // import 'package:flutter_config/flutter_config.dart';
 import 'package:timeago/timeago.dart';
 // import 'package:firebase_core/firebase_core.dart';
@@ -15,5 +17,10 @@ void main() {
 
   setLocaleMessages('pt_BR', PtBrMessages());
 
-  runApp(const App());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => IrregularityRepository())
+    ],
+    child: const App(),
+  ));
 }

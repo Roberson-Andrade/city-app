@@ -2,8 +2,9 @@ import 'dart:collection';
 
 import 'package:city/model/irregularity.dart';
 import 'package:city/model/user.dart';
+import 'package:flutter/material.dart';
 
-class IrregularityRepository {
+class IrregularityRepository extends ChangeNotifier {
   final List<Irregularity> _irregularities = [];
 
   UnmodifiableListView<Irregularity> get irregularities =>
@@ -12,24 +13,6 @@ class IrregularityRepository {
   IrregularityRepository() {
     _irregularities.addAll([
       Irregularity(
-        title: "Buraco grande na estrada",
-        description:
-            "Encontra-se um buraco enorme na rua Avelino Dias Pereira no bairro das Laranjeiras. A prefeitura já foi avisada sobre dezenas de vezes e nada...",
-        address:
-            "Rua Avelino Dias Pereira, 1000 - Cidade Nova, Rio de Janeiro - RJ",
-        imagesUrl: [
-          "https://media.istockphoto.com/id/95658927/pt/foto/estrada-danos.jpg?s=612x612&w=0&k=20&c=MUg9ULfotqHVm5kNzVEfNnOmiYiK3_n5GLXWeUwbfRs=",
-          "https://www.examepelobem.com.br/fotos/images/buracos-na-estrada-o-que-fazer(1).png"
-        ],
-        likes: 45,
-        createdAt: DateTime.now(),
-        user: User(
-            name: "Roberson Andrade",
-            avatarImage:
-                "https://avatars.githubusercontent.com/u/78360479?v=4"),
-      ),
-      Irregularity(
-        title: "Poste de luz",
         description: "Poste de luz está queimado há 2 semanas.",
         address: "Rua Valerio Ronchi, 701, Santa Cruz, BH",
         imagesUrl: [
@@ -43,7 +26,6 @@ class IrregularityRepository {
                 "https://media.licdn.com/dms/image/C4D03AQGXwGU-r226ew/profile-displayphoto-shrink_200_200/0/1648961368675?e=2147483647&v=beta&t=ctBv_RMY0E7oCPu_p4Bmdleed7tblPSiFRWR1nf29aA"),
       ),
       Irregularity(
-        title: "Terreno Abandonado",
         description:
             "Este terreno encontra-se em estado de abandono há meses, representando um risco à segurança pública e um foco potencial de proliferação de pragas e criminalidade. Solicito uma intervenção urgente por parte da prefeitura para resolver essa situação e garantir a segurança e o bem-estar da comunidade local.",
         address: "Rua Pedro Aluisio, 321, Rebouças - PR",
@@ -62,6 +44,10 @@ class IrregularityRepository {
 
   List<Irregularity> getIrregularities() {
     return irregularities;
+  }
+
+  void saveIrregularity(Irregularity irregularity) {
+    _irregularities.insert(0, irregularity);
   }
 
   List<Irregularity> getIrregularitiesByName(String userName) {
