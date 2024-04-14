@@ -63,4 +63,10 @@ class IrregularityRepository {
   List<Irregularity> getIrregularities() {
     return irregularities;
   }
+
+  List<Irregularity> getIrregularitiesByName(String userName) {
+    return irregularities
+        .where((element) => element.user.name == userName)
+        .toList();
+  }
 }
