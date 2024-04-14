@@ -1,9 +1,11 @@
 import 'package:city/model/irregularity.dart';
+import 'package:city/repositories/irregularity_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago_flutter/timeago_flutter.dart';
 
 class IrregularityPost extends StatefulWidget {
@@ -62,10 +64,6 @@ class _IrregularityPostState extends State<IrregularityPost> {
                 ),
               ),
             ),
-            // CircleAvatar(
-            //   backgroundImage:
-            //       NetworkImage(widget.irregularity.user.avatarImage),
-            // ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,10 +84,61 @@ class _IrregularityPostState extends State<IrregularityPost> {
             ),
           ],
         ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.map_outlined),
-          tooltip: 'Ver no mapa',
+        Row(
+          children: [
+            SizedBox(
+              height: 28,
+              width: 28,
+              child: IconButton(
+                onPressed: () {},
+                iconSize: 20,
+                padding: EdgeInsets.all(4),
+                icon: const Icon(
+                  Icons.map_outlined,
+                ),
+                tooltip: 'Ver no mapa',
+              ),
+            ),
+            SizedBox(
+              height: 28,
+              width: 28,
+              child: IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Deletar post"),
+                      content: const Text(
+                          "Tem certeza que deseja deletar esse post?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Voltar")),
+                        TextButton(
+                            onPressed: () {
+                              context
+                                  .read<IrregularityRepository>()
+                                  .deleteIrregularity(widget.irregularity.id);
+                            },
+                            child: const Text("Deletar"))
+                      ],
+                    ),
+                  );
+                  // context
+                  //     .read<IrregularityRepository>()
+                  //     .deleteIrregularity(widget.irregularity.id);
+                },
+                padding: const EdgeInsets.all(4),
+                iconSize: 20,
+                icon: const Icon(
+                  Icons.delete_outline,
+                ),
+                tooltip: 'Deletar',
+              ),
+            )
+          ],
         )
       ],
     );

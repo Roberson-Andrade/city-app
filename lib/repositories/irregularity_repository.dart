@@ -50,6 +50,10 @@ class IrregularityRepository extends ChangeNotifier {
     _irregularities.insert(0, irregularity);
   }
 
+  void deleteIrregularity(String id) {
+    _irregularities.removeWhere((element) => element.id == id);
+  }
+
   List<Irregularity> getIrregularitiesByName(String userName) {
     return irregularities
         .where((element) => element.user.name == userName)
