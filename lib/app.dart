@@ -1,6 +1,8 @@
+import 'package:city/model/user.dart';
 import 'package:city/pages/home/home.dart';
 import 'package:city/pages/irregularities/irregularities.dart';
 import 'package:city/pages/irregularity_form/irregularity_form.dart';
+import 'package:city/pages/profile/profile.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -13,6 +15,7 @@ class App extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         var routes = <String, WidgetBuilder>{
           '/': (context) => const HomePage(),
+          '/profile': (context) => Profile(user: settings.arguments as User),
           '/irregularities': (context) => const IrregularitiesPage(),
           '/irregularities/new': (context) => IrregularityForm(
               initialCategoryType: settings.arguments as IrregularityFormArgs)

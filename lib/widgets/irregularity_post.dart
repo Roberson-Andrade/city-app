@@ -49,10 +49,23 @@ class _IrregularityPostState extends State<IrregularityPost> {
       children: [
         Row(
           children: [
-            CircleAvatar(
-              backgroundImage:
-                  NetworkImage(widget.irregularity.user.avatarImage),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context)
+                    .pushNamed('/profile', arguments: widget.irregularity.user);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(60),
+                child: Image.network(
+                  widget.irregularity.user.avatarImage,
+                  height: 42,
+                ),
+              ),
             ),
+            // CircleAvatar(
+            //   backgroundImage:
+            //       NetworkImage(widget.irregularity.user.avatarImage),
+            // ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
