@@ -121,6 +121,7 @@ class _IrregularityPostState extends State<IrregularityPost> {
                               context
                                   .read<IrregularityRepository>()
                                   .deleteIrregularity(widget.irregularity.id);
+                              Navigator.of(context).pop();
                             },
                             child: const Text("Deletar"))
                       ],

@@ -48,10 +48,12 @@ class IrregularityRepository extends ChangeNotifier {
 
   void saveIrregularity(Irregularity irregularity) {
     _irregularities.insert(0, irregularity);
+    notifyListeners();
   }
 
   void deleteIrregularity(String id) {
     _irregularities.removeWhere((element) => element.id == id);
+    notifyListeners();
   }
 
   List<Irregularity> getIrregularitiesByName(String userName) {

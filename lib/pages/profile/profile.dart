@@ -2,18 +2,19 @@ import 'package:city/model/irregularity.dart';
 import 'package:city/repositories/irregularity_repository.dart';
 import 'package:city/widgets/irregularity_post.dart';
 import 'package:flutter/material.dart';
-import 'package:city/model/user.dart'; // Assuming you have your User model defined here
+import 'package:city/model/user.dart';
+import 'package:provider/provider.dart'; // Assuming you have your User model defined here
 
 class Profile extends StatelessWidget {
   final User user;
-  final IrregularityRepository repository = IrregularityRepository();
 
   Profile({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    List<Irregularity> userIrregularities =
-        repository.getIrregularitiesByName(user.name);
+    List<Irregularity> userIrregularities = context
+        .watch<IrregularityRepository>()
+        .getIrregularitiesByName(user.name);
 
     int totalLikes = userIrregularities.fold<int>(
         0, (sum, irregularity) => sum + irregularity.likes);
