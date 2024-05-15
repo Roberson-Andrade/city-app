@@ -1,9 +1,12 @@
 import 'package:city/model/irregularity.dart';
+import 'package:city/model/user.dart';
 import 'package:city/repositories/irregularity_repository.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:city/repositories/user_repository.dart';
+import 'package:city/services/storage_service.dart';
+import 'package:firebase_auth/firebase_auth.dart' as F;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago_flutter/timeago_flutter.dart';
@@ -21,6 +24,67 @@ class IrregularityPost extends StatefulWidget {
 class _IrregularityPostState extends State<IrregularityPost> {
   final CarouselController _controller = CarouselController();
   int _current = 0;
+
+  User? user;
+  List<Reference>? images;
+  bool _isLoadingDeletion = false;
+  String? userId = F.FirebaseAuth.instance.currentUser?.uid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadUser();
+    loadImages();
+  }
+
+  loadUser() {
+    context
+        .read<UserRepository>()
+        .getUserById(widget.irregularity.userId)
+        .then((value) => {
+              setState(() {
+                if (value != null) {
+                  user = value;
+                }
+              })
+            });
+  }
+
+  loadImages() async {
+    final loadedImages = await StorageService.getIrregularityImages(
+        userId: widget.irregularity.userId,
+        irregularityId: widget.irregularity.id);
+
+    if (loadedImages != null) {
+      setState(() {
+        images = loadedImages;
+      });
+    }
+  }
+
+  void deleteIrregularity() async {
+    if (userId == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingDeletion = true;
+    });
+
+    try {
+      await context
+          .read<IrregularityRepository>()
+          .deleteIrregularity(id: widget.irregularity.id, userId: userId!);
+      Navigator.of(context).pop();
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _isLoadingDeletion = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,22 +117,25 @@ class _IrregularityPostState extends State<IrregularityPost> {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.of(context)
-                    .pushNamed('/profile', arguments: widget.irregularity.user);
+                if (user != null) {
+                  Navigator.of(context).pushNamed('/profile', arguments: user);
+                }
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(60),
-                child: Image.network(
-                  widget.irregularity.user.avatarImage,
-                  height: 42,
-                ),
+                child: user?.avatarImage != null
+                    ? Image.network(
+                        user!.avatarImage!,
+                        height: 42,
+                      )
+                    : const Icon(Icons.account_circle, size: 42),
               ),
             ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.irregularity.user.name),
+                Text(user?.name ?? ""),
                 Timeago(
                   builder: (_, value) => Text(
                     value,
@@ -99,46 +166,43 @@ class _IrregularityPostState extends State<IrregularityPost> {
                 tooltip: 'Ver no mapa',
               ),
             ),
-            SizedBox(
-              height: 28,
-              width: 28,
-              child: IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text("Deletar post"),
-                      content: const Text(
-                          "Tem certeza que deseja deletar esse post?"),
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("Voltar")),
-                        TextButton(
-                            onPressed: () {
-                              context
-                                  .read<IrregularityRepository>()
-                                  .deleteIrregularity(widget.irregularity.id);
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("Deletar"))
-                      ],
-                    ),
-                  );
-                  // context
-                  //     .read<IrregularityRepository>()
-                  //     .deleteIrregularity(widget.irregularity.id);
-                },
-                padding: const EdgeInsets.all(4),
-                iconSize: 20,
-                icon: const Icon(
-                  Icons.delete_outline,
+            if (widget.irregularity.userId == userId)
+              SizedBox(
+                height: 28,
+                width: 28,
+                child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Deletar post"),
+                        content: const Text(
+                            "Tem certeza que deseja deletar esse post?"),
+                        actions: [
+                          TextButton(
+                              onPressed: _isLoadingDeletion
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).pop();
+                                    },
+                              child: const Text("Voltar")),
+                          TextButton(
+                            onPressed:
+                                _isLoadingDeletion ? null : deleteIrregularity,
+                            child: const Text("Deletar"),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  padding: const EdgeInsets.all(4),
+                  iconSize: 20,
+                  icon: const Icon(
+                    Icons.delete_outline,
+                  ),
+                  tooltip: 'Deletar',
                 ),
-                tooltip: 'Deletar',
-              ),
-            )
+              )
           ],
         )
       ],
@@ -159,15 +223,22 @@ class _IrregularityPostState extends State<IrregularityPost> {
     return Column(
       children: [
         CarouselSlider(
-          items: widget.irregularity.imagesUrl
-              .map((image) => ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Image.network(
-                      image,
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover,
-                    ),
-                  ))
+          items: images
+              ?.map(
+                (image) => ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: FutureBuilder(
+                    future: image.getDownloadURL(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Image.network(snapshot.data!);
+                      }
+
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                ),
+              )
               .toList(),
           carouselController: _controller,
           options: CarouselOptions(

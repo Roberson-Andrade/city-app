@@ -1,10 +1,11 @@
-import 'dart:math';
-
 import 'package:city/model/irregularity.dart';
-import 'package:city/model/user.dart';
 import 'package:city/pages/home/utils.dart';
 import 'package:city/repositories/irregularity_repository.dart';
+import 'package:city/services/storage_service.dart';
+import 'package:city/utils/gallery.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_picker/gallery_picker.dart';
 import 'package:provider/provider.dart';
 
 class IrregularityFormArgs {
@@ -29,13 +30,9 @@ class _IrregularityFormState extends State<IrregularityForm> {
 
   final _formKey = GlobalKey<FormState>();
   final _description = TextEditingController();
+  MediaFile? imageFile;
 
-  final mockImages = [
-    "https://odia.ig.com.br/_midias/jpg/2018/04/26/img_20170810_122004294_hdr-6553832.jpg",
-    "https://araraquaraagora.com/images/noticias/11247/10035730_Img0_600x4.jpg",
-    "https://media.istockphoto.com/id/95658927/pt/foto/estrada-danos.jpg?s=612x612&w=0&k=20&c=MUg9ULfotqHVm5kNzVEfNnOmiYiK3_n5GLXWeUwbfRs=",
-    "https://www.examepelobem.com.br/fotos/images/buracos-na-estrada-o-que-fazer(1).png"
-  ];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -46,29 +43,43 @@ class _IrregularityFormState extends State<IrregularityForm> {
             .basicSanitation; // Default value if initialCategoryType is null
   }
 
-  saveIrregularity() {
-    if (_formKey.currentState!.validate()) {
-      final notesRepository = context.read<IrregularityRepository>();
+  saveIrregularity() async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-      notesRepository.saveIrregularity(
-        Irregularity(
-          description: _description.text,
-          address: "Rua dos bobos, 0",
-          createdAt: DateTime.now(),
-          imagesUrl: [mockImages[Random().nextInt(mockImages.length - 1)]],
-          user: User(
-              name: "Roberson Andrade",
-              avatarImage:
-                  "https://avatars.githubusercontent.com/u/78360479?v=4"),
-        ),
+    if (!_formKey.currentState!.validate() || userId == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final notesRepository = context.read<IrregularityRepository>();
+
+    try {
+      Irregularity newIrregularity = Irregularity(
+        description: _description.text,
+        address: "Rua dos bobos, 0",
+        createdAt: DateTime.now(),
+        imagesUrl: [],
+        userId: userId,
       );
+
+      await notesRepository.saveIrregularity(newIrregularity);
+
+      var file = await imageFile?.getFile();
+
+      if (file != null) {
+        await StorageService.uploadIrregularityImage(
+            file: file, irregularityId: newIrregularity.id, userId: userId);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
             children: [
               Icon(Icons.check),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 "Irregularidade criada com sucesso!",
                 style: TextStyle(color: Colors.white),
@@ -79,6 +90,13 @@ class _IrregularityFormState extends State<IrregularityForm> {
         ),
       );
       Navigator.of(context).pop();
+      // ignore: empty_catches
+    } on FirebaseException catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -99,7 +117,9 @@ class _IrregularityFormState extends State<IrregularityForm> {
               valueListenable: _description,
               builder: (context, value, child) {
                 return ElevatedButton(
-                  onPressed: value.text.isEmpty ? null : saveIrregularity,
+                  onPressed: value.text.isEmpty || _isLoading
+                      ? null
+                      : saveIrregularity,
                   child: const Text("Criar"),
                 );
               },
@@ -119,10 +139,10 @@ class _IrregularityFormState extends State<IrregularityForm> {
                     controller: _description,
                     maxLines: null,
                     minLines: 3,
-                    decoration: const InputDecoration(
-                      hintText: "Descreva a irregularidade",
-                      border: InputBorder.none,
-                    ),
+                    decoration: InputDecoration(
+                        hintText: "Descreva a irregularidade",
+                        border: InputBorder.none,
+                        enabled: !_isLoading),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -147,7 +167,16 @@ class _IrregularityFormState extends State<IrregularityForm> {
                   _buildSection(
                       title: 'Imagens',
                       iconBtn: IconButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          MediaFile? selectedImage =
+                              await getImageFromGallery(context);
+
+                          if (selectedImage != null) {
+                            setState(() {
+                              imageFile = selectedImage;
+                            });
+                          }
+                        },
                         icon: const Icon(
                           Icons.add_photo_alternate_outlined,
                           size: 20,
@@ -164,11 +193,13 @@ class _IrregularityFormState extends State<IrregularityForm> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(
-                          child: Icon(
-                            Icons.photo_library_outlined,
-                            color: Theme.of(context).colorScheme.outline,
-                            size: 38,
-                          ),
+                          child: imageFile != null
+                              ? PhotoProvider(media: imageFile!)
+                              : Icon(
+                                  Icons.photo_library_outlined,
+                                  color: Theme.of(context).colorScheme.outline,
+                                  size: 38,
+                                ),
                         ),
                       )),
                   const SizedBox(

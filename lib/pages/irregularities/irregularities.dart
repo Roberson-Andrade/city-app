@@ -1,6 +1,7 @@
 import 'package:city/model/irregularity.dart';
 import 'package:city/repositories/irregularity_repository.dart';
 import 'package:city/widgets/irregularity_post.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,38 +13,32 @@ class IrregularitiesPage extends StatefulWidget {
 }
 
 class _IrregularitiesPageState extends State<IrregularitiesPage> {
-  List<Irregularity> irregularities = [];
-  late bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final IrregularityRepository irregularityRepository =
-        context.watch<IrregularityRepository>();
-
-    irregularities = irregularityRepository.getIrregularities();
-
     return Scaffold(
       appBar: AppBar(
         actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+      body: StreamBuilder<QuerySnapshot<Irregularity>>(
+          stream: context.read<IrregularityRepository>().getIrregularities(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.data == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            var irregularities = snapshot.data?.docs ?? [];
+
+            return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: irregularities.length,
-              itemBuilder: (context, index) =>
-                  IrregularityPost(irregularity: irregularities[index]),
-            ),
+              itemBuilder: (context, index) {
+                var irregularity = irregularities[index].data();
+
+                return IrregularityPost(irregularity: irregularity);
+              },
+            );
+          }),
     );
   }
 }

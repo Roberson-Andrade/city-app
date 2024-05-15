@@ -1,5 +1,8 @@
 import 'package:city/app.dart';
 import 'package:city/repositories/irregularity_repository.dart';
+import 'package:city/repositories/user_repository.dart';
+import 'package:city/services/irregularity_service.dart';
+import 'package:city/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +25,12 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => IrregularityRepository())
+      ChangeNotifierProvider(
+          create: (_) => IrregularityRepository(
+              irregularityService: IrregularityService())),
+      ChangeNotifierProvider(
+        create: (_) => UserRepository(userService: UserService()),
+      ),
     ],
     child: const App(),
   ));
