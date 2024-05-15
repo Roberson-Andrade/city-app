@@ -4,15 +4,15 @@
 
 [Emerson Lacerda](https://github.com/mabmab55)
 
--   [x] Criação da tela de perfil dos usuários, criação do vetor de objetos para simular informações vindas de um banco.
+-   [x] Criação da tela de perfil dos usuários, criação do vetor de objetos para simular informações vindas de um banco, CRUD de usuário no Firebase e autenticação.
 
 [Roberson Andrade](https://github.com/Roberson-Andrade)
 
--   [x] Criação da tela de feed e de cadastro de novas ocorrências, configuração inicial do projeto, criação dos models e repositories.
+-   [x] Criação da tela de feed e de cadastro de novas ocorrências, configuração inicial do projeto, criação dos models e repositories, configuração para utilização do firebase no projeto, auxílio com a autenticação e storage do Firebase.
 
 [Davi B](https://github.com/dsbuhrer)
 
--   [x] Criação da tela de cadastro e login, validação das variáveis utilizadas e feedback ao usuário.
+-   [x] Criação da tela de cadastro e login, validação das variáveis utilizadas e feedback ao usuário, criação do CRUD de irregularidade e utilização do Storage no firebase.
 
 ### Funcionalidades
 
@@ -26,6 +26,7 @@
 
 -   Dart
 -   Flutter
+-   Firebase
 
 ### 💻 Pré-requisitos
 
