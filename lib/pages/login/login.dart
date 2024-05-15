@@ -1,4 +1,8 @@
+import 'package:city/model/user.dart';
+import 'package:city/services/user_service.dart';
+import 'package:city/utils/auth.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart' as Firebase;
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,36 +13,95 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _userService = UserService();
+
   final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  late bool _isLoading = false;
 
-  void login(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+  bool _isLogin = true;
+  bool _isLoading = false;
 
-      Future.delayed(Duration(seconds: 2), () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check),
-                SizedBox(width: 8),
-                Text(
-                  "Login realizado com sucesso",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
+  String? errorMessage;
+
+  void showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.white),
             ),
-            backgroundColor: Colors.green.shade500,
-          ),
-        );
-        Navigator.of(context).pushReplacementNamed('/home');
+          ],
+        ),
+        backgroundColor: Colors.green.shade500,
+      ),
+    );
+  }
+
+  Future<void> signInWithEmailAndPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      errorMessage = null;
+    });
+    _isLoading = true;
+
+    try {
+      await Auth().signInWithEmailAndPassword(
+          email: _email.text, password: _password.text);
+      showSnackbar("Login realizado com sucesso!");
+      Navigator.of(context).pushReplacementNamed('/home');
+    } on Firebase.FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = 'Email ou senha incorreto';
       });
+    } finally {
+      _isLoading = false;
     }
+  }
+
+  Future<void> createUserWithEmailAndPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      errorMessage = null;
+    });
+    _isLoading = true;
+
+    try {
+      var response = await Auth().createUserWithEmailAndPassword(
+          email: _email.text, password: _password.text);
+      _userService.saveUser(
+          User(id: response.user!.uid, email: _email.text, name: _name.text));
+
+      showSnackbar("Usuário criado com sucesso!");
+      Navigator.of(context).pushReplacementNamed('/home');
+    } on Firebase.FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'email-already-in-use') {
+          errorMessage = 'Já existe uma conta com este email';
+        }
+      });
+    } finally {
+      _isLoading = false;
+    }
+  }
+
+  onSubmit() {
+    if (_isLoading) {
+      return null;
+    }
+
+    if (_isLogin) {
+      return signInWithEmailAndPassword;
+    }
+
+    return createUserWithEmailAndPassword;
   }
 
   @override
@@ -55,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(
-                    height: 92,
+                    height: 82,
                   ),
                   const Icon(
                     Icons.location_city,
@@ -70,6 +133,21 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 54,
                   ),
+                  if (!_isLogin)
+                    _buildInput(
+                        controller: _name,
+                        hintText: "Nome",
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Campo obrigatório";
+                          }
+
+                          return null;
+                        }),
+                  if (!_isLogin)
+                    const SizedBox(
+                      height: 18,
+                    ),
                   _buildInput(
                       controller: _email,
                       hintText: "Email",
@@ -97,7 +175,8 @@ class _LoginPageState extends State<LoginPage> {
                         }
 
                         return null;
-                      }),
+                      },
+                      errorMessage: errorMessage),
                   const SizedBox(
                     height: 18,
                   ),
@@ -105,13 +184,13 @@ class _LoginPageState extends State<LoginPage> {
                     height: 55,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : () => login(context),
+                      onPressed: onSubmit(),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child: Text("Entrar"),
+                      child: Text(_isLogin ? "Entrar" : "Criar"),
                     ),
                   ),
                   const SizedBox(
@@ -144,18 +223,29 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "Não tem uma conta?",
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                            fontWeight: FontWeight.w400),
-                      ),
+                      if (_isLogin)
+                        Text(
+                          "Não tem uma conta?",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                                fontWeight: FontWeight.w400,
+                              ),
+                        ),
                       const SizedBox(
                         width: 8,
                       ),
                       TextButton(
-                        onPressed: _isLoading ? null : () {},
-                        child: const Text("Crie agora"),
+                        onPressed: !_isLoading
+                            ? () {
+                                setState(() {
+                                  _isLogin = !_isLogin;
+                                });
+                              }
+                            : null,
+                        child: Text(_isLogin ? "Crie agora" : "Fazer login"),
                       ),
                     ],
                   )
@@ -168,18 +258,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildInput({
-    required TextEditingController controller,
-    required String hintText,
-    bool obscureText = false,
-    String? Function(String?)? validator,
-  }) {
+  Widget _buildInput(
+      {required TextEditingController controller,
+      required String hintText,
+      bool obscureText = false,
+      String? Function(String?)? validator,
+      String? errorMessage}) {
     return TextFormField(
       enabled: !_isLoading,
       controller: controller,
       obscureText: obscureText,
       validator: validator,
       decoration: InputDecoration(
+        errorText: errorMessage,
         hintText: hintText,
         focusedErrorBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).colorScheme.error)),

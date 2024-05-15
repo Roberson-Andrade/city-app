@@ -1,4 +1,5 @@
 import 'package:city/model/user.dart';
+import 'package:city/pages/auth/auth_page.dart';
 import 'package:city/pages/home/home.dart';
 import 'package:city/pages/irregularities/irregularities.dart';
 import 'package:city/pages/irregularity_form/irregularity_form.dart';
@@ -15,7 +16,8 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (RouteSettings settings) {
         var routes = <String, WidgetBuilder>{
-          '/': (context) => const LoginPage(),
+          '/': (context) => const AuthPage(),
+          '/login': (context) => const LoginPage(),
           '/home': (context) => const HomePage(),
           '/profile': (context) => Profile(user: settings.arguments as User),
           '/irregularities': (context) => const IrregularitiesPage(),
